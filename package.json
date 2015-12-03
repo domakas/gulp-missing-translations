@@ -1,0 +1,30 @@
+{
+  "name": "gulp-missing-translations",
+  "version": "0.0.1",
+  "description": "Check missing translation strings",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/domakas/gulp-missing-translations"
+  },
+  "author": {
+    "name": "Domas Maksimas",
+    "email": "domas.maksimas@gmail.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "gulpplugin",
+    "gulpmissingtranslations"
+  ],
+  "dependencies": {
+    "glob": "^6.0.1",
+    "gulp-util": "^3.0.7",
+    "lodash": "^3.10.1",
+    "through2": "^2.0.0"
+  }
+}
