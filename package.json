@@ -1,6 +1,6 @@
 {
   "name": "gulp-missing-translations",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Check missing translation strings",
   "license": "MIT",
   "repository": {
