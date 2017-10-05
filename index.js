@@ -4,6 +4,7 @@ var fs = require('fs');
 var through = require('through2');
 var gutil = require('gulp-util');
 var _ = require('lodash');
+var mergeStream = require('merge-stream');
 
 module.exports = function(options) {
   var translationsSrc = options.translationsSrc;
@@ -22,15 +23,16 @@ module.exports = function(options) {
     translations = translations.concat(file.contents.toString().match(/MVTR_[A-Z0-9_]+/g));
     callback(null, file);
   }, function(callback) {
-
+    var streams;
+    var missingTranslationsCount = 0;
     translations = _(translations).compact().uniq().value();
     glob(translationsSrc, null, function(er, translationFiles) {
       if (er) {
         return;
       }
 
-      translationFiles.forEach(function(translationFile) {
-        fs.createReadStream(translationFile)
+      streams = translationFiles.map(function(translationFile) {
+        return fs.createReadStream(translationFile)
           .pipe(through.obj(function(file, encoding, cb) {
             var fileContent = file.toString();
             var missingTranslations = [];
@@ -39,6 +41,7 @@ module.exports = function(options) {
               if (_.endsWith(translation, '_')) {
                 if (fileContent.indexOf(translation) === -1) {
                   missingTranslations.push(translation);
+                  missingTranslationsCount++;
                 }
                 return;
               }
@@ -46,6 +49,7 @@ module.exports = function(options) {
               // all translations in JSON file ends with "
               if (fileContent.indexOf(translation + '"') === -1) {
                 missingTranslations.push(translation);
+                missingTranslationsCount++;
               }
             });
 
@@ -55,8 +59,18 @@ module.exports = function(options) {
           }));
       });
 
+      mergeStream.apply(null, streams)
+        .on('finish', function() {
+          if (missingTranslationsCount === 0) {
+            callback();
+            return;
+          }
 
-      callback();
+          callback(new gutil.PluginError(
+            'gulp-missing-translations',
+            'Missing ' + missingTranslationsCount + ' translations!')
+          );
+        });
     });
   });
 
